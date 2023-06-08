@@ -2,14 +2,17 @@ package study.datajpa.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.Join;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import study.datajpa.entity.Member;
 import study.datajpa.entity.Team;
 
@@ -178,6 +181,42 @@ class MemberRepositoryTest {
     }
 
 
+    @Test
+    public void specBasic() throws Exception {
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+        em.flush();
+        em.clear();
+
+        //when
+        Specification<Member> spec = MemberSpec.username("m1").and(MemberSpec.teamName("teamA"));
+        List<Member> result = memberRepository.findAll(spec);
+
+        //then
+        assertThat(result.size()).isEqualTo(1);
+    }
+
+    public class MemberSpec {
+
+        public static Specification<Member> teamName(final String teamName) {
+            return (Specification<Member>) (root, query, builder) -> {
+                if (StringUtils.isEmpty(teamName)) {
+                    return null;
+                }
+                Join<Member, Team> t = root.join("team", JoinType.INNER); //회원과 조
+                return builder.equal(t.get("name"), teamName);
+            };
+        }
+        public static Specification<Member> username(final String username) {
+            return (Specification<Member>) (root, query, builder) ->
+                    builder.equal(root.get("username"), username);
+        }
+    }
 
 
 }

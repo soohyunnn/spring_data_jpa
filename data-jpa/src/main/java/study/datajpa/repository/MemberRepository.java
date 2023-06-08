@@ -10,7 +10,7 @@ import study.datajpa.entity.Member;
 import java.awt.print.Pageable;
 import java.util.List;
 
-public interface MemberRepository extends JpaRepository<Member, Long> , MemberRepositoryCustom{
+public interface MemberRepository extends JpaRepository<Member, Long> , JpaSpecificationExecutor<Member> {
 
     List<Member> findByUsernameAndAgeGreaterThan(String username, int age);
 

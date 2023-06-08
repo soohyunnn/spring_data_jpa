@@ -10,7 +10,7 @@ import study.datajpa.entity.Member;
 import java.awt.print.Pageable;
 import java.util.List;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long> , MemberRepositoryCustom{
 
     List<Member> findByUsernameAndAgeGreaterThan(String username, int age);
 
@@ -63,4 +63,5 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<Member> findByUsername(String name);
+
 }
